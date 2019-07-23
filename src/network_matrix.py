@@ -73,15 +73,11 @@ class Network(object):
         gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
         is the learning rate."""
-        nabla_b = [np.zeros(b.shape) for b in self.biases]
-        nabla_w = [np.zeros(w.shape) for w in self.weights]
         delta_nabla_b, delta_nabla_w = self.backprop(inp, classification)
-        nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
-        nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         self.weights = [w-(eta/nbatch)*nw
-                        for w, nw in zip(self.weights, nabla_w)]
+                        for w, nw in zip(self.weights, delta_nabla_w)]
         self.biases = [b-(eta/nbatch)*nb
-                       for b, nb in zip(self.biases, nabla_b)]
+                       for b, nb in zip(self.biases, delta_nabla_b)]
 
     def backprop(self, inp, classification):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
@@ -116,8 +112,8 @@ class Network(object):
             delta = np.matmul(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             nabla_w[-l] = np.matmul(delta, np.swapaxes(activations[-l-1], -2, -1))
-        return ([nb.mean(axis=0) for nb in nabla_b],
-                [nw.mean(axis=0) for nw in nabla_w])
+        return ([nb.sum(axis=0) for nb in nabla_b],
+                [nw.sum(axis=0) for nw in nabla_w])
 
     def evaluate(self, test_data):
         """Return the number of test inputs for which the neural
